@@ -1,8 +1,8 @@
 {
   "_from": "openhab-proxy-pattern",
-  "_id": "openhab-proxy-pattern@1.0.1",
+  "_id": "openhab-proxy-pattern@1.0.2",
   "_inBundle": false,
-  "_integrity": "sha512-j4DNOdZZtWsBLhflxR2TlHRXMY+T2AKcxCGdDbLIRZ+uPrm5FdvSDz61OzBXcMVSxRc35p61VoP1bDKU0eyURg==",
+  "_integrity": "sha512-gVUDykfik4rFx3e854ydjFZh04a33+RzBYJD9oUxs+SAc6cbxaMwWTTZCKHCu9qSoD80qUP+MwnOauaYq16BWA==",
   "_location": "/openhab-proxy-pattern",
   "_phantomChildren": {},
   "_requested": {
@@ -19,8 +19,8 @@
     "#USER",
     "/"
   ],
-  "_resolved": "https://registry.npmjs.org/openhab-proxy-pattern/-/openhab-proxy-pattern-1.0.1.tgz",
-  "_shasum": "d875f82cb15f689f52e3991d49cc2f23576b35f0",
+  "_resolved": "https://registry.npmjs.org/openhab-proxy-pattern/-/openhab-proxy-pattern-1.0.2.tgz",
+  "_shasum": "f556539c6d9378c439faa7b47f6ab572885997d5",
   "_spec": "openhab-proxy-pattern",
   "_where": "/etc/openhab/automation/js",
   "author": {
@@ -28,7 +28,7 @@
   },
   "bundleDependencies": false,
   "deprecated": false,
-  "description": "",
+  "description": "JS wrapper to implement common used Proxy Item pattern",
   "keywords": [],
   "license": "ISC",
   "main": "index.js",
@@ -36,5 +36,5 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "version": "1.0.1"
+  "version": "1.0.2"
 }
