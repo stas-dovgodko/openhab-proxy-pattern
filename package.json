@@ -29,7 +29,12 @@
   "bundleDependencies": false,
   "deprecated": false,
   "description": "JS wrapper to implement common used Proxy Item pattern",
-  "keywords": ["openhab", "proxy-pattern", "JS", "iot"],
+  "keywords": [
+    "openhab",
+    "proxy-pattern",
+    "JS",
+    "iot"
+  ],
   "license": "ISC",
   "main": "index.js",
   "name": "openhab-proxy-pattern",
@@ -40,5 +45,5 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "version": "1.0.2"
+  "version": "1.0.3"
 }
