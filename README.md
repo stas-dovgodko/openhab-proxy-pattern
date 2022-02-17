@@ -32,8 +32,6 @@ proxy.bind('Equipment_ElectricityInverterBattery_Voltage', 'PZEM_1_Voltage')
     });
 
 // wide-options proxy
-let phases = ['A', 'B', 'C'];
-
 const v = function(value) {
     if (typeof value == 'string') {
         const v = parseInt(value);
@@ -41,10 +39,8 @@ const v = function(value) {
     } else return undefined;
 };
 
-phases.forEach(function(phase) {
-    proxy.bind(`Equipment_ElectricityHomeV${phase}`, `Shelly_EM3_2_${phase}Voltage`)
+['A', 'B', 'C'].forEach(function(phase) {
+    proxy.bind(`Equipment_ElectricityHomeV${phase}`, `Shelly_EM3_2_${phase}Voltage`, 15) // 15 seconds gap between updates. For too fast hardware
     .update(v);
 });
-
 ```
-
