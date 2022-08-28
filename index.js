@@ -14,6 +14,8 @@ class Proxy {
             name: name,
             description: "Proxy forward",
             triggers: [triggers.ItemCommandTrigger(this._item.name)],
+            overwrite: true,
+            ruleGroup: "PROXY forward",
             execute: event => {
                 if (callback === undefined) {
                     this._hardware.sendCommandIfDifferent(event.receivedCommand);
@@ -36,7 +38,7 @@ class Proxy {
             triggers.ItemStateUpdateTrigger(this._hardware.name)
         ];
         if (this._seconds > 0) {
-            t.push(triggers.GenericCronTrigger('0/' + parseInt(this._seconds) + ' * * ? * *'));
+            t.push(triggers.GenericCronTrigger('0/' + parseInt(this._seconds) + ' * * ? * * *'));
         }
 
         const c = state => {
@@ -52,9 +54,11 @@ class Proxy {
             name: name,
             description: "Proxy update",
             triggers: t,
+            overwrite: true,
+            ruleGroup: "PROXY update",
             execute: event => {
                 if (this._seconds > 0) {
-                    if (event.eventType == 'time') {
+                    if (event.eventType !== 'update') { // timer
                         if (this.pooled !== undefined) {
                             c(this.pooled);
 

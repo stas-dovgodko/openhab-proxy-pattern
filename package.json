@@ -1,6 +1,5 @@
 {
   "_from": "openhab-proxy-pattern",
-  "_id": "openhab-proxy-pattern@1.0.2",
   "_inBundle": false,
   "_integrity": "sha512-gVUDykfik4rFx3e854ydjFZh04a33+RzBYJD9oUxs+SAc6cbxaMwWTTZCKHCu9qSoD80qUP+MwnOauaYq16BWA==",
   "_location": "/openhab-proxy-pattern",
@@ -45,5 +44,5 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "version": "1.1.0"
+  "version": "1.2.0"
 }
