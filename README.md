@@ -40,7 +40,7 @@ const v = function(value) {
 };
 
 ['A', 'B', 'C'].forEach(function(phase) {
-    proxy.bind(`Equipment_ElectricityHomeV${phase}`, `Shelly_EM3_2_${phase}Voltage`, 15) // 15 seconds gap between updates. For too fast hardware
-    .update(v);
+    proxy.bind(`Equipment_ElectricityHomeV${phase}`, `Shelly_EM3_2_${phase}Voltage`, 15)
+      .update(v, 15); // 15 seconds gap between updates. For too-fast hardware
 });
 ```
