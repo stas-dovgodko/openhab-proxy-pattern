@@ -1,58 +1,95 @@
-class Proxy 
+class ProxyPattern 
 {
     constructor(Item, hardwareItem)
     {
-        this.proxyItem = Item;
-        this.hardwareItem = hardwareItem;
+        this._updateUndefined = false;
+        this._map = new Map(); // proxy => hardware
 
-        this._hasForward = false;
-        this._hasUpdate = false;
+        let isString = value => typeof value === 'string' || value instanceof String;
+
+        
+        if (Item instanceof Map) {
+            Item.forEach((value, key) => {
+                this._map.set(key, {hardware: value, forward: false, update: false});
+            });
+        } else if (Item instanceof Object) {
+            for (const [key, value] of Object.entries(Item)) {
+                this._map.set(key, {hardware: value, forward: false, update: false});
+            };
+        } else if (isString(Item) && isString(hardwareItem)) {
+            this._map.set(Item, {hardware: hardwareItem, forward: false, update: false});
+        }
+        // make name
+        this._name = ""; let i = 0;
+        this._map.forEach((value, key) => {
+            this._name = this._name.concat(key,"-",value.hardware);
+            if (this._map.size > ++i) {
+                this._name = this._name.concat(", ");
+            }
+        });
     }
 
+    undefinedState(state = true)
+    {
+        this._updateUndefined = state;
+
+        return this;
+    }
+
+    get withUndefined()
+    {
+        return this.undefinedState();
+    }
+
+    // forward proxy to hardware
     forward(callback, delay) {
-        const name = "PROXY forward " + this.proxyItem + " commands to " + this.hardwareItem;
-        
         const delayms = ((typeof delay === 'number') ? delay : 0) * 1000;
 
-        const c = command => {
+        const c = (name, command) => {
             if (callback === undefined) {
-                items.getItem(this.hardwareItem).sendCommand(command);
+                if (command !== undefined) items.getItem(name).sendCommand(command);
             } else if (typeof callback === 'function') {
                 const v = callback(command);
-                if (v !== undefined) items.getItem(this.hardwareItem).sendCommand(v);
+                if (v !== undefined) items.getItem(name).sendCommand(v);
             }
             
         }
 
-        rules.JSRule({
-            name: name,
-            description: "Proxy forward",
-            triggers: [triggers.ItemCommandTrigger(this.proxyItem)],
-            overwrite: true,
-            ruleGroup: "PROXY forward",
-            execute: event => {
-
-                if (this.delayTimer) {
-                    clearInterval(this.delayTimer);
-                }
-
-                if (delayms > 0) {
-                    this.delayTimer = setTimeout(function(){
-                        c(event.receivedCommand);
-                   }, delayms);
-                } else {
-                    if (this.pooled !== undefined) {
-                        delete this.pooled;
-                    }
-
-                    c(event.receivedCommand);
-                }
-            },
-            tags: ['PROXY', 'forward', this.hardwareItem, this.proxyItem]
+        let forward_triggers = [];
+        this._map.forEach((value, key) => {
+            forward_triggers.push(triggers.ItemCommandTrigger(key));
+            value.forward = true;
+            if (value.update) {
+                items.getItem(value.hardware).replaceMetadata('autoupdate', 'false');
+            }
         });
-        this._hasForward = true;
-        if (this._hasUpdate) {
-            items.getItem(this.hardwareItem).replaceMetadata('autoupdate', 'false');
+        if (forward_triggers.length > 0) {
+            rules.JSRule({
+                name: "proxy forward [".concat(this._name, "]"),
+                triggers: forward_triggers,
+                overwrite: true,
+                id: "forward: "+this._name,
+                tags: ['ProxyManager'],
+                execute: event => {
+                    let proxy_name = event.itemName;
+
+                    let v = this._map.get(proxy_name);
+                    if (v.timer) {
+                        clearInterval(v.timer);
+                    }
+                    if (delayms > 0) {
+                        v.timer = setTimeout((function(){
+                            c(this.item, items.getItem(this.item).state);
+                        }).bind({item: v.hardware, state: event.receivedCommand}), delayms);
+                    } else {
+                        if (v.pooled !== undefined) {
+                            delete v.pooled;
+                        }
+    
+                        c(v.hardware, event.receivedCommand);
+                    }
+                }
+            });
         }
 
         return this;
@@ -60,54 +97,76 @@ class Proxy
 
     update(callback, interval)
     {
-        const name = "PROXY update " + this.hardwareItem + " state to " + this.proxyItem;
-
-        let t = [
-            triggers.ItemStateChangeTrigger(this.hardwareItem),
-            triggers.SystemStartlevelTrigger(40)
+        let update_triggers = [
+            triggers.SystemStartlevelTrigger(100)
         ];
         let seconds = 0;
         if (typeof interval === 'number') {
             seconds = parseInt(interval);
-            t.push(triggers.GenericCronTrigger('0/' + parseInt(interval) + ' * * ? * * *')); 
+            update_triggers.push(triggers.GenericCronTrigger('0/' + parseInt(interval) + ' * * ? * * *')); 
         }
-
-        const c = state => {
-            if (callback === undefined) {
-                if (state !== undefined) items.getItem(this.proxyItem).postUpdate(state);
-            } else if (typeof callback === 'function') {
-                const v = callback(state);
-                if (v !== undefined) items.getItem(this.proxyItem).postUpdate(v);
+        this._map.forEach((value, key) => {
+            update_triggers.push(triggers.ItemStateChangeTrigger(value.hardware));
+            value.update = true;
+            if (value.forward) {
+                items.getItem(value.hardware).replaceMetadata('autoupdate', 'false');
             }
+        });
+
+        const c = (name, state) => {
+            let v = undefined;
+            if (callback === undefined) {
+                v = state;
+            } else if (typeof callback === 'function') {
+                v = callback(state);
+            }
+            if (v === undefined) {
+                if (this._updateUndefined === true) {
+                    items.getItem(name).postUpdate('UNDEF');
+                } else if (typeof this._updateUndefined !== false) items.getItem(name).postUpdate(this._updateUndefined);
+            } else {
+                items.getItem(name).postUpdate(v);
+            }
+
         }
 
-        rules.JSRule({
-            name: name,
-            description: "Proxy update",
-            triggers: t,
-            overwrite: true,
-            ruleGroup: "PROXY update",
-            execute: event => {
-                if (seconds > 0) {
-                    
-                    if (event.eventType !== 'change') { // timer
-                        if (this.pooled === undefined) {
-                            this.pooled = items.getItem(this.hardwareItem).state;
-                        }
+        if (update_triggers.length > 0) {
+            rules.JSRule({
+                name: "proxy update [".concat(this._name, "]"),
+                triggers: update_triggers,
+                overwrite: true,
+                id: "update: "+this._name,
+                tags: ['ProxyManager'],
+                execute: event => {
+                    this._map.forEach((value, key) => {
+                        if (event.eventType === 'change') {
+                            if (value.hardware === event.itemName) {
+                                // found item
+                                if (seconds > 0) {
+                                    value.pooled = event.newState;
+                                } else {
+                                    c(key, event.newState);
+                                }
+                            }
 
-                        c(this.pooled);
-                    } else {
-                        this.pooled = event.newState;
-                    }
-                } else {
-                    c(event.newState);
+                        } else if (event.eventType === 'time') {
+
+                            if (value.pooled === undefined) {
+                                value.pooled = items.getItem(value.hardware).state;
+                            }
+
+                            c(key, value.pooled);
+                        } else {
+                            c(key, items.getItem(value.hardware).state);
+                        }
+                    });
                 }
-            },
-            tags: ['PROXY', 'update', this.hardwareItem, this.proxyItem]
-        });
-        this._hasUpdate = true;
-        if (this._hasForward) {
-            items.getItem(this.hardwareItem).replaceMetadata('autoupdate', 'false');
+            });
+
+            // initial state
+            this._map.forEach((value, key) => {
+                c(key, items.getItem(value.hardware).state);
+            });
         }
 
         return this;
@@ -116,19 +175,14 @@ class Proxy
     updateEveryMinute(callback) {
         return this.update(callback, 60);
     }
-
-    item() {
-        return rules.when().item(this.proxyItem);
-    }
-
-    hardware() {
-        return rules.when().item(this.hardwareItem);
-    }
 }
+
+// proxy.softItem.update('hardware', callback).everySeconds(15)
+// proxy.softItem.forward('hardware', callback).delaySeconds(15)
 
 
 
 exports.bind = (Item, hardwareItem) => {
 
-    return new Proxy(Item, hardwareItem);
+    return new ProxyPattern(Item, hardwareItem);
 }
