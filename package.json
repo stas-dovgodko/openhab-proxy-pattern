@@ -1,0 +1,51 @@
+{
+  "_from": "openhab-proxy-pattern",
+  "_inBundle": false,
+  "_integrity": "sha512-gVUDykfik4rFx3e854ydjFZh04a33+RzBYJD9oUxs+SAc6cbxaMwWTTZCKHCu9qSoD80qUP+MwnOauaYq16BWA==",
+  "_location": "/openhab-proxy-pattern",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "openhab-proxy-pattern",
+    "name": "openhab-proxy-pattern",
+    "escapedName": "openhab-proxy-pattern",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/openhab-proxy-pattern/-/openhab-proxy-pattern-1.0.2.tgz",
+  "_shasum": "f556539c6d9378c439faa7b47f6ab572885997d5",
+  "_spec": "openhab-proxy-pattern",
+  "_where": "/etc/openhab/automation/js",
+  "author": {
+    "name": "standov@gmail.com"
+  },
+  "bundleDependencies": false,
+  "deprecated": false,
+  "description": "JS wrapper to implement common used Proxy Item pattern",
+  "keywords": [
+    "openhab",
+    "proxy-pattern",
+    "JS",
+    "iot"
+  ],
+  "license": "ISC",
+  "main": "index.js",
+  "name": "openhab-proxy-pattern",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stas-dovgodko/openhab-proxy-pattern.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "1.3.0",
+  "dependencies": {
+    "openhab": "^5.8.1"
+  }
+}
